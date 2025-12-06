@@ -5,6 +5,8 @@ library(skimr)
 
 suicidal_ideation <- read_csv("./data/suicidal_ideation.csv")
 
+suicidal_ideation
+
 
 
 suicidal_ideation <- suicidal_ideation %>%
@@ -55,10 +57,38 @@ suicidal_ideation <- suicidal_ideation %>%
     symptom = "suicidal_ideation"
   )
 
+set.seed(42)
+sampled_suicidal_ideation <- suicidal_ideation %>%
+  sample_n(10000)
+
+sampled_suicidal_ideation
+
+# Step 2: Count suicidal_ideation per month
+monthly_counts <- sampled_suicidal_ideation %>%
+  count(month_start, month_year) %>%
+  arrange(month_start) %>%
+  mutate(month_year = factor(month_year, levels = unique(month_year)))
+
+
+# Step 3: Plot
+ggplot(monthly_counts, aes(x = month_year, y = n)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    title = "Monthly Post Counts",
+    x = "Month",
+    y = "Number of suicidal_ideation"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 
 # remove unecessary columns
 suicidal_ideation <- suicidal_ideation %>%
   select(-subreddit, -month_year, -month, -created_utc, -day, -url, -month_start, -year)
+
+sampled_suicidal_ideation <- sampled_suicidal_ideation %>%
+  select(-subreddit, -month_year, -month, -created_utc, -day, -url, -month_start, -year)
+
 
 # remove NAs from selftext
 
@@ -80,6 +110,6 @@ suicidal_ideation_10K <- suicidal_ideation %>%
 
 # save the recent 10K posts
 
-write_csv(suicidal_ideation_10K, "./data/suicidal_ideation_10K.csv")
+write_csv(sampled_suicidal_ideation, "./data/suicidal_ideation_10K_v1.csv")
 
 suicidal_ideation_10K
